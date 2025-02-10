@@ -159,6 +159,8 @@ try:
                 "판매처": source
             })
             driver.execute_script("arguments[0].scrollIntoView(true);", product)
+            
+        ###### 다음 페이지 이동(해결필요)
         try:
             next_page_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[class*='next-next']")))
             next_page_btn.click()

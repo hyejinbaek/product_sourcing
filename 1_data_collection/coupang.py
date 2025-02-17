@@ -1,4 +1,4 @@
-# 국내시장(쿠팡) 데이터 수집
+# 국내시장(쿠팡) 상품 전체 페이지 데이터 수집
 
 import os
 from selenium import webdriver

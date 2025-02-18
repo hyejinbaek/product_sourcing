@@ -42,79 +42,68 @@ try:
     time.sleep(2)
     print("✅ '자동차용품' 2차 카테고리 선택 완료!")
     
-    #############################################################
-    # 4. 기간 선택
-    ## 여기부터 기간 수정 필요
-    #############################################################
-    period_btn = wait.until(EC.presence_of_element_located((By.XPATH, "//label[@for='8_set_period0']")))
-    period_btn.click()
-    time.sleep(1)
-
-    # 현재 날짜 구하기
+    # 4. 기간 선택 (오늘 날짜의 1일부터 오늘까지)
     today = datetime.today()
     start_date = today.replace(day=1)  # 이번 달 1일
-    end_date = today  # 🔹 변경: 마지막 날짜가 오늘 날짜가 되도록 수정
+    end_date = today  # 오늘 날짜
 
-    # 연도 선택 (시작 연도)
-    year_btn = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@class='select w2']/span[@class='select_btn']")))
-    driver.execute_script("arguments[0].click();", year_btn)
-    time.sleep(1)
-    year_option = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{start_date.year}']")))
-    year_option.click()
-    time.sleep(1)
+    def select_date(xpath, value, needs_scroll=False):
+        """드롭다운을 열고 원하는 값을 선택하는 함수"""
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
+        driver.execute_script("arguments[0].click();", element)  # 드롭다운 열기
+        time.sleep(1)
 
-    # 월 선택 (시작 월)
-    month_btn = wait.until(EC.presence_of_element_located((By.XPATH, "(//div[@class='select w3']/span[@class='select_btn'])[1]")))
-    driver.execute_script("arguments[0].click();", month_btn)
-    time.sleep(1)
-    month_option = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{start_date.month:02d}']")))
-    month_option.click()
-    time.sleep(1)
+        option = wait.until(EC.presence_of_element_located((By.XPATH, f"//a[text()='{value}']")))
 
-    # 일 선택 (시작일)
-    day_btn = wait.until(EC.presence_of_element_located((By.XPATH, "(//div[@class='select w3']/span[@class='select_btn'])[2]")))
-    driver.execute_script("arguments[0].click();", day_btn)
-    time.sleep(1)
-    day_option = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{start_date.day:02d}']")))
-    day_option.click()
-    time.sleep(1)
+        if needs_scroll:
+            # JavaScript로 스크롤 이동 후 클릭
+            driver.execute_script("arguments[0].scrollIntoView(false);", option)
+            time.sleep(1)
 
-    # 종료 연도 선택 (오늘 날짜 기준)
-    end_year_btn = wait.until(EC.presence_of_element_located((By.XPATH, "(//div[@class='select w2']/span[@class='select_btn'])[2]")))
-    driver.execute_script("arguments[0].click();", end_year_btn)
-    time.sleep(1)
-    end_year_option = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{end_date.year}']")))
-    end_year_option.click()
-    time.sleep(1)
+        driver.execute_script("arguments[0].click();", option)  # 옵션 선택
+        time.sleep(1)
+        
+    # 종료 날짜 선택 (일(day) 선택 시 스크롤 필요)
+    select_date("(//div[@class='select w2']/span[@class='select_btn'])[2]", end_date.year)
+    select_date("(//div[@class='select w3']/span[@class='select_btn'])[3]", f"{end_date.month:02d}")
+    select_date("(//div[@class='select w3']/span[@class='select_btn'])[4]", f"{end_date.day:02d}", needs_scroll=True)
 
-    # 종료 월 선택 (오늘 날짜 기준)
-    end_month_btn = wait.until(EC.presence_of_element_located((By.XPATH, "(//div[@class='select w3']/span[@class='select_btn'])[3]")))
-    driver.execute_script("arguments[0].click();", end_month_btn)
-    time.sleep(1)
-    end_month_option = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{end_date.month:02d}']")))
-    end_month_option.click()
-    time.sleep(1)
+    # 시작 날짜 선택 (일(day) 선택 시 스크롤 필요)
+    select_date("//div[@class='select w2']/span[@class='select_btn']", start_date.year)
+    select_date("(//div[@class='select w3']/span[@class='select_btn'])[1]", f"{start_date.month:02d}")
+    select_date("(//div[@class='select w3']/span[@class='select_btn'])[2]", f"{start_date.day:02d}", needs_scroll=True)
 
-    # 종료 일 선택 (오늘 날짜 기준)
-    end_day_btn = wait.until(EC.presence_of_element_located((By.XPATH, "(//div[@class='select w3']/span[@class='select_btn'])[4]")))
-    driver.execute_script("arguments[0].click();", end_day_btn)
-    time.sleep(1)
-    end_day_option = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{end_date.day:02d}']")))
-    end_day_option.click()
-    time.sleep(1)
+    
 
     print(f"✅ 기간 선택 완료: {start_date.strftime('%Y-%m-%d')} ~ {end_date.strftime('%Y-%m-%d')}")
-
     
     # 5. 기기별 선택
+    device_all_checkbox = wait.until(EC.presence_of_element_located((
+        By.XPATH, "//input[@id='18_device_0']")))  # 기기별 > 전체 체크박스
+    driver.execute_script("arguments[0].click();", device_all_checkbox)
+    time.sleep(1)
+    print("✅ '기기별 > 전체' 선택 완료")
     
     # 6. 성별 선택
+    sex_all_checkbox = wait.until(EC.presence_of_element_located((
+        By.XPATH, "//input[@id='19_gender_0']")))  # 성별 > 전체 체크박스
+    driver.execute_script("arguments[0].click();", sex_all_checkbox)
+    time.sleep(1)
+    print("✅ '성별 > 전체' 선택 완료")
     
     # 7. 연령 선택
+    age_all_checkbox = wait.until(EC.presence_of_element_located((
+        By.XPATH, "//input[@id='20_age_0']")))  # 성별 > 전체 체크박스
+    driver.execute_script("arguments[0].click();", age_all_checkbox)
+    time.sleep(1)
+    print("✅ '성별 > 전체' 선택 완료")
     
     # 8. 조회하기 버튼 클릭
-
-    
+    search_button = wait.until(EC.presence_of_element_located((
+        By.XPATH, "//a[@class='btn_submit']/span[text()='조회하기']")))  # 조회하기 버튼
+    driver.execute_script("arguments[0].click();", search_button)
+    time.sleep(2)
+    print("✅ 조회버튼 클릭 완료!")
 
 except Exception as e:
     print(f"❌ 오류 발생: {e}")

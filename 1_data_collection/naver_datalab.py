@@ -73,8 +73,6 @@ try:
     select_date("(//div[@class='select w3']/span[@class='select_btn'])[1]", f"{start_date.month:02d}")
     select_date("(//div[@class='select w3']/span[@class='select_btn'])[2]", f"{start_date.day:02d}", needs_scroll=True)
 
-    
-
     print(f"✅ 기간 선택 완료: {start_date.strftime('%Y-%m-%d')} ~ {end_date.strftime('%Y-%m-%d')}")
     
     # 5. 기기별 선택
@@ -104,6 +102,38 @@ try:
     driver.execute_script("arguments[0].click();", search_button)
     time.sleep(2)
     print("✅ 조회버튼 클릭 완료!")
+    
+    # 9. 결과 데이터 추출
+    try:
+        # 잠시 대기하여 결과 로딩 완료 후 데이터를 추출
+        time.sleep(3)  # 페이지 로딩을 기다립니다 (시간은 필요에 따라 조절)
+
+        # 결과 테이블 추출 (여기서는 예시로 테이블을 추출한다고 가정)
+        results_table = wait.until(EC.presence_of_element_located((By.XPATH, "//table[@class='tbl_data']")))  # 테이블의 XPATH는 실제 상황에 맞게 조정
+
+        # 테이블 내의 데이터 행 추출
+        rows = results_table.find_elements(By.XPATH, ".//tr")
+        
+        data = []
+        for row in rows[1:]:  # 첫 번째 행은 헤더이므로 제외
+            cols = row.find_elements(By.XPATH, ".//td")
+            if len(cols) > 0:
+                # 각 열에서 데이터를 추출
+                data_row = {
+                    'Product Name': cols[0].text.strip(),
+                    'Price': cols[1].text.strip(),
+                    'Sales Count': cols[2].text.strip(),
+                    'Rating': cols[3].text.strip()
+                }
+                data.append(data_row)
+        
+        # 데이터 출력
+        for entry in data:
+            print(entry)
+        
+        print("✅ 데이터 추출 완료!")
+    except Exception as e:
+        print(f"❌ 데이터 추출 오류: {e}")
 
 except Exception as e:
     print(f"❌ 오류 발생: {e}")

@@ -17,20 +17,23 @@ driver = webdriver.Chrome(service=Service('chromedriver-win64/chromedriver.exe')
 driver.maximize_window()
 wait = WebDriverWait(driver, 10)
 
+# 엑셀 파일명에 포함할 변수 초기화
+period = ""
+category_1 = ""
+category_2 = ""
+category_3 = ""
+device_selection = ""
+gender_selection = ""
+age_selection = ""
+
 data = {
-    "기간": [],
-    "1차 카테고리": [],
-    "2차 카테고리": [],
-    "3차 카테고리": [],
-    "기기별 선택": [],
-    "성별 선택": [],
-    "연령 선택": [],
     "인기검색어 순위": [],
     "인기검색어": []
 }
 
 
 def select_period(start_year, start_month, start_day, end_year, end_month, end_day):
+    global period
     # 시작 연도 선택
     start_year_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "(//div[@class='select w2'])[1]//span[@class='select_btn']")))
     driver.execute_script("arguments[0].click();", start_year_btn)
@@ -57,48 +60,35 @@ def select_period(start_year, start_month, start_day, end_year, end_month, end_d
     time.sleep(1)
 
     # ✅ 종료 연도 선택
-    # end_year_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "(//div[@class='select w2'])[2]//span[@class='select_btn']")))
-    # driver.execute_script("arguments[0].click();", end_year_btn)
-    # time.sleep(1)
-    # end_year_option = wait.until(EC.element_to_be_clickable((By.XPATH, f"//ul[@class='select_list scroll_cst']//li/a[text()='{end_year}']")))
-    # driver.execute_script("arguments[0].click();", end_year_option)
-    # time.sleep(1)
     print("🔍 종료 연도 선택 중...")
     end_year_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "(//div[@class='select w2'])[2]//span[@class='select_btn']")))
     driver.execute_script("arguments[0].scrollIntoView(true);", end_year_btn)
     driver.execute_script("arguments[0].click();", end_year_btn)
     time.sleep(1)
-    print(f"🔍 종료 연도 {end_year} 찾는 중...")
     # 모든 연도 옵션 가져와서 일치하는 값 클릭
     options = driver.find_elements(By.XPATH, "//div[@class='select w2']//ul[@class='select_list scroll_cst']//li/a")
     for option in options:
-        print(f"🎯 옵션 발견: {option.text}")
         if option.text.strip() == end_year:
             driver.execute_script("arguments[0].scrollIntoView(true);", option)
             driver.execute_script("arguments[0].click();", option)
             print(f"✅ 종료 연도 {end_year} 선택 완료.")
             break
+    
     else:
         print(f"❌ {end_year} 연도를 찾을 수 없습니다.")
+    period = f"{start_year}-{start_month}-{start_day}~{end_year}-{end_month}-{end_day}"
+    print(f"✅ 기간 선택 완료: {period}")
 
 
     # ✅ 종료 월 선택 (경로 수정됨)
-    # end_month_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "(//div[@class='select w3'])[3]//span[@class='select_btn']")))
-    # driver.execute_script("arguments[0].click();", end_month_btn)
-    # time.sleep(1)
-    # month_options = wait.until(EC.element_to_be_clickable((By.XPATH, f"//ul[@class='select_list scroll_cst']//li/a[text()='{end_month.zfill(2)}']")))
-    # driver.execute_script("arguments[0].click();", month_options)
-    # time.sleep(1)
     print("🔍 종료 월 선택 중...")
     end_month_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "(//div[@class='select w3'])[3]//span[@class='select_btn']")))
     driver.execute_script("arguments[0].scrollIntoView(true);", end_month_btn)
     driver.execute_script("arguments[0].click();", end_month_btn)
     time.sleep(1)
-    print(f"🔍 종료 월 {end_month} 찾는 중...")
     # 모든 연도 옵션 가져와서 일치하는 값 클릭
     options = driver.find_elements(By.XPATH, "//div[@class='select w3']//ul[@class='select_list scroll_cst']//li/a")
     for option in options:
-        print(f"🎯 옵션 발견: {option.text}")
         if option.text.strip() == end_month:
             driver.execute_script("arguments[0].scrollIntoView(true);", option)
             driver.execute_script("arguments[0].click();", option)
@@ -118,7 +108,6 @@ def select_period(start_year, start_month, start_day, end_year, end_month, end_d
         # 모든 일 옵션 가져와서 일치하는 값 클릭
         day_options = driver.find_elements(By.XPATH, "//div[@class='select w3']//ul[@class='select_list scroll_cst']//li/a")
         for option in day_options:
-            print(f"🎯 일 옵션 발견: {option.text}")
             if option.text.strip() == end_day:
                 driver.execute_script("arguments[0].scrollIntoView(true);", option)
                 driver.execute_script("arguments[0].click();", option)
@@ -128,7 +117,7 @@ def select_period(start_year, start_month, start_day, end_year, end_month, end_d
             print(f"❌ {end_day} 일을 찾을 수 없습니다.")
     except Exception as e:
         print(f"❌ 종료 일 선택 중 오류 발생: {e}")
-    data["기간"].append(f"{start_year}-{start_month}-{start_day} ~ {end_year}-{end_month}-{end_day}")
+    
     print(f"✅ 기간 선택 완료: {start_year}-{start_month}-{start_day} ~ {end_year}-{end_month}-{end_day}")
 
 
@@ -148,18 +137,19 @@ try:
     category_life_health = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@data-cid='50000008']")))
     category_life_health.click()
     time.sleep(2)
-    data["1차 카테고리"].append(category_life_health)
+    category_1 = "생활_건강"
     print("✅ '생활/건강' 카테고리 선택 완료!")
 
     
     subcategory_btn = wait.until(EC.presence_of_element_located((By.XPATH, "(//span[@class='select_btn'])[2]")))
     driver.execute_script("arguments[0].click();", subcategory_btn)
+    category_2 = "자동차용품"
     time.sleep(1)
 
     subcategory_car = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@data-cid='50000055']")))
     subcategory_car.click()
     time.sleep(2)
-    data["2차 카테고리"].append(subcategory_car)
+    
     print("✅ '자동차용품' 2차 카테고리 선택 완료!")
     
     ### 3차 카테고리 선택 (아래의 내용은 id 번호 정리 - 순서대로 진행)
@@ -186,10 +176,10 @@ try:
     subcategory_3.click()
     time.sleep(2)
     print("✅ 3차 카테고리 선택 완료!")
-    data["3차 카테고리"].append(subcategory_3)
+    category_3 = "DIY용품"
     
     # 4. 기간 선택 
-    select_period(start_year="2024", start_month="01", start_day="01", end_year="2024", end_month="01", end_day="31")
+    select_period(start_year="2024", start_month="02", start_day="01", end_year="2024", end_month="02", end_day="29")
     print(f"✅ 기간 선택 완료:")
     
     # 5. 기기별 선택
@@ -197,7 +187,7 @@ try:
         By.XPATH, "//input[@id='18_device_0']")))  # 기기별 > 전체 체크박스
     driver.execute_script("arguments[0].click();", device_all_checkbox)
     time.sleep(1)
-    data["기기별 선택"].append("전체")
+    device_selection = "전체"
     print("✅ '기기별 > 전체' 선택 완료")
     
     # 6. 성별 선택
@@ -205,7 +195,7 @@ try:
         By.XPATH, "//input[@id='19_gender_0']")))  # 성별 > 전체 체크박스
     driver.execute_script("arguments[0].click();", sex_all_checkbox)
     time.sleep(1)
-    data["성별 선택"].append("전체")
+    gender_selection = "전체"
     print("✅ '성별 > 전체' 선택 완료")
     
     # 7. 연령 선택
@@ -213,7 +203,7 @@ try:
         By.XPATH, "//input[@id='20_age_0']")))  # 성별 > 전체 체크박스
     driver.execute_script("arguments[0].click();", age_all_checkbox)
     time.sleep(1)
-    data["연령 선택"].append("전체")
+    age_selection = "전체"
     print("✅ '연령 > 전체' 선택 완료")
     
     # 8. 조회하기 버튼 클릭
@@ -347,10 +337,10 @@ try:
         print(f"❌ 인기검색어 데이터 추출 오류: {e}")
         
     df = pd.DataFrame(data)
-    output_file = 'crawled_data.xlsx'
+    output_file = f"./crawled_data/{period}_{category_1}_{category_2}_{category_3}_{device_selection}_{gender_selection}_{age_selection}.xlsx"
     with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='조회결과')
-    print(f"엑셀 파일 '{output_file}'로 저장 완료!")
+    print(f"엑셀 파일 './crawled_data/{output_file}'로 저장 완료!")
 
 except Exception as e:
     print(f"❌ 오류 발생: {e}")

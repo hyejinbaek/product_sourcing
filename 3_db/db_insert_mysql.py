@@ -63,14 +63,14 @@ def insert_file_info(cursor, file_name, start_date, end_date, cat1, cat2, cat3):
         print(f"❌ file_info 삽입 실패: {e}")
         raise
 
-def insert_popular_keywords(cursor, file_id, df_keywords):
-    """popular_keywords 테이블에 인기 검색어 데이터 삽입"""
+def insert_popular_keywords(cursor, file_id, month, df_keywords):
+    """popular_keywords 테이블에 인기 검색어 데이터 삽입 (month 컬럼 추가)"""
     query = """
-        INSERT INTO popular_keywords (file_id, rank_list, keyword)
-        VALUES (%s, %s, %s)
+        INSERT INTO popular_keywords (file_id, month, rank_list, keyword)
+        VALUES (%s, %s, %s, %s)
     """
     try:
-        data = [(file_id, row['인기검색어 순위'], row['인기검색어']) for _, row in df_keywords.iterrows()]
+        data = [(file_id, month, row['인기검색어 순위'], row['인기검색어']) for _, row in df_keywords.iterrows()]
         cursor.executemany(query, data)
         print(f"✅ 인기 검색어 삽입 성공, 삽입된 행 수: {cursor.rowcount}")
     except Exception as e:
@@ -97,6 +97,9 @@ def process_excel(file_path):
     file_name = os.path.basename(file_path)
     start_date, end_date, cat1, cat2, cat3 = parse_filename(file_name)
 
+    # ✅ month 값 생성 (YYYY-MM 형식)
+    month = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m")
+
     # ✅ Excel 파일 읽기
     df_keywords = pd.read_excel(file_path, sheet_name='조회결과')
     df_clicks = pd.read_excel(file_path, sheet_name='날짜별 클릭량')
@@ -110,14 +113,13 @@ def process_excel(file_path):
         return  # DB 연결 실패 시 작업을 중단
     cursor = conn.cursor()
 
-
     try:
         # ✅ file_info 저장
         file_id = insert_file_info(cursor, file_name, start_date, end_date, cat1, cat2, cat3)
         print(f"file_info 저장 완료 (file_id={file_id})")
 
-        # ✅ 인기 검색어 저장
-        insert_popular_keywords(cursor, file_id, df_keywords)
+        # ✅ 인기 검색어 저장 (month 추가)
+        insert_popular_keywords(cursor, file_id, month, df_keywords)
         print("popular_keywords 저장 완료")
 
         # ✅ 날짜별 클릭량 저장
@@ -131,14 +133,20 @@ def process_excel(file_path):
         conn.rollback()
         print(f"❌ 오류 발생: {e}")
 
-    finally:
-        cursor.close()
-        conn.close()
-
 def main():
-    # 📁 업로드할 Excel 파일 경로
-    excel_file = '../1_data_collection/crawled_data/2024-01-01~2024-01-31_생활_건강_자동차용품_DIY용품_전체_전체_전체.xlsx'
-    process_excel(excel_file)
+    """📂 지정된 폴더 내 모든 Excel 파일 처리"""
+    folder_path = '../1_data_collection/crawled_data/complete_final'
+    print(f"📂 폴더 내 모든 파일 처리 시작: {folder_path}")
+
+    for file in os.listdir(folder_path):
+        if file.endswith('.xlsx'):
+            file_path = os.path.join(folder_path, file)
+            print(f"🚀 처리 시작: {file}")
+            try:
+                process_excel(file_path)
+            except Exception as e:
+                print(f"⚠️ 파일 처리 중 오류 발생 ({file}): {e}")
+            print("==============================")
 
 if __name__ == "__main__":
     main()

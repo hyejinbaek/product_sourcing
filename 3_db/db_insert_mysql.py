@@ -30,33 +30,39 @@ def connect_db():
 
 
 def parse_filename(file_name):
-    """파일명에서 날짜 및 카테고리 정보 파싱 (생활/건강 등 슬래시 포함 처리)"""
+    """파일명에서 날짜 및 카테고리 정보 파싱 (카테고리 구분은 언더스코어로 처리)"""
     print(f"🔍 파싱할 파일명: {file_name}")
+    # 정규식을 수정하여 언더스코어로 구분된 카테고리 처리
     pattern = (
         r'(\d{4}-\d{2}-\d{2})~'       # 시작 날짜
         r'(\d{4}-\d{2}-\d{2})_'       # 종료 날짜
-        r'(.*?)_'                     # 카테고리 1 (생활/건강)
-        r'(.*?)_'                     # 카테고리 2
-        r'(.*?)\.xlsx'                # 카테고리 3
+        r'([^\_]+(?:\_[^\_]+)*)_'      # 카테고리 1 (생활_건강 처럼 _ 포함된 카테고리)
+        r'([^_]+)_'                   # 카테고리 2
+        r'([^_]+)_'                   # 카테고리 3
+        r'([^_]+)_'                   # device (전체)
+        r'([^_]+)_'                   # sex (전체)
+        r'([^_]+)\.xlsx'              # age (전체)
     )
     match = re.match(pattern, file_name)
+    
     if match:
-        print(f"✅ 파일명 파싱 성공: {match.groups()}")
-        return match.groups()
+        start_date, end_date, cat1, cat2, cat3, device, sex, age = match.groups()
+        print(f"✅ 파일명 파싱 성공: {start_date}, {end_date}, {cat1}, {cat2}, {cat3}, {device}, {sex}, {age}")
+        return start_date, end_date, cat1, cat2, cat3, device, sex, age
     else:
         raise ValueError(f"❌ 파일명이 예상된 형식과 다릅니다: {file_name}")
 
 
 
-def insert_file_info(cursor, file_name, start_date, end_date, cat1, cat2, cat3):
+def insert_file_info(cursor, file_name, start_date, end_date, cat1, cat2, cat3, device, sex, age, month):
     """file_info 테이블에 데이터 삽입 후 file_id 반환"""
     print(f"📥 file_info 테이블에 데이터 삽입 시도: {file_name}")
     query = """
-        INSERT INTO file_info (file_name, category_1, category_2, category_3, start_date, end_date)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO file_info (file_name, category_1, category_2, category_3, start_date, end_date, device, sex, age, month)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     try:
-        cursor.execute(query, (file_name, cat1, cat2, cat3, start_date, end_date))
+        cursor.execute(query, (file_name, cat1, cat2, cat3, start_date, end_date, device, sex, age, month))
         print(f"✅ file_info 삽입 성공, 영향을 받은 행 수: {cursor.rowcount}")
         return cursor.lastrowid
     except Exception as e:
@@ -95,7 +101,7 @@ def insert_daily_clicks(cursor, file_id, df_clicks):
 def process_excel(file_path):
     """Excel 파일을 읽고 MySQL에 저장"""
     file_name = os.path.basename(file_path)
-    start_date, end_date, cat1, cat2, cat3 = parse_filename(file_name)
+    start_date, end_date, cat1, cat2, cat3, device, sex, age = parse_filename(file_name)
 
     # ✅ month 값 생성 (YYYY-MM 형식)
     month = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m")
@@ -114,8 +120,8 @@ def process_excel(file_path):
     cursor = conn.cursor()
 
     try:
-        # ✅ file_info 저장
-        file_id = insert_file_info(cursor, file_name, start_date, end_date, cat1, cat2, cat3)
+        # ✅ file_info 저장 (month 값 추가)
+        file_id = insert_file_info(cursor, file_name, start_date, end_date, cat1, cat2, cat3, device, sex, age, month)
         print(f"file_info 저장 완료 (file_id={file_id})")
 
         # ✅ 인기 검색어 저장 (month 추가)

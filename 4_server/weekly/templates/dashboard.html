@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>월별 인기검색어 주별 데이터</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f4f4f9;
+            padding-top: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        table th, table td {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">월별 인기검색어 주별 순위</h2>
+
+        <!-- 날짜 선택 -->
+        <div class="form-group">
+            <label for="search_date">조회할 날짜를 선택하세요 (년-월):</label>
+            <input type="month" id="search_date" class="form-control">
+            <button id="search_button" class="btn btn-primary mt-2">조회</button>
+        </div>
+
+        <!-- 주별 인기검색어 테이블 -->
+        <h3 class="text-center">주별 인기검색어 순위</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>주차</th>
+                    <th>인기검색어</th>
+                    <th>순위</th>
+                    <th>클릭수</th>
+                </tr>
+            </thead>
+            <tbody id="weekly_data">
+                <!-- 주별 데이터가 여기에 동적으로 채워집니다. -->
+            </tbody>
+        </table>
+
+        <!-- 일별 클릭수 테이블 -->
+        <h3 class="text-center">일별 클릭수</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>날짜</th>
+                    <th>클릭수</th>
+                </tr>
+            </thead>
+            <tbody id="daily_clicks">
+                <!-- 일별 클릭수가 여기에 동적으로 채워집니다. -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // 데이터 요청 및 화면에 표시하는 함수
+        $('#search_button').click(function() {
+            const selectedDate = $('#search_date').val();
+            
+            if (!selectedDate) {
+                alert('날짜를 선택해주세요.');
+                return;
+            }
+            
+            $.ajax({
+                url: '/get_data',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ search_date: selectedDate }),
+                success: function(response) {
+                    if (response.data) {
+                        // 주별 데이터 출력
+                        let weeklyDataHtml = '';
+                        response.data.forEach(function(row) {
+                            weeklyDataHtml += `
+                                <tr>
+                                    <td>${row.week}</td>
+                                    <td>${row.keyword}</td>
+                                    <td>${row.rank_list}</td>
+                                    <td>${row.click_count}</td>
+                                </tr>
+                            `;
+                        });
+                        $('#weekly_data').html(weeklyDataHtml);
+
+                        // 일별 클릭수 출력
+                        let dailyClicksHtml = '';
+                        response.daily_clicks.forEach(function(row) {
+                            dailyClicksHtml += `
+                                <tr>
+                                    <td>${row.date}</td>
+                                    <td>${row.click_count}</td>
+                                </tr>
+                            `;
+                        });
+                        $('#daily_clicks').html(dailyClicksHtml);
+                    } else {
+                        alert('데이터를 불러오는 데 실패했습니다.');
+                    }
+                },
+                error: function() {
+                    alert('서버와 연결할 수 없습니다.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

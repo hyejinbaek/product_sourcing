@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>인기 검색어 분석 대시보드</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; margin: 20px; }
+        form { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h1>📊 인기 검색어 분석 대시보드</h1>
+
+    <form id="searchForm">
+        <label for="search_date">📅 날짜 선택: </label>
+        <input type="date" id="search_date" name="search_date">
+        <button type="submit">🔍 검색</button>
+    </form>
+
+    <h3 id="selectedDate"></h3>
+
+    <section>
+        <h2>📈 날짜별 클릭 수 추이</h2>
+        <canvas id="clickChart"></canvas>
+    </section>
+
+    <section>
+        <h2>🔍 전체 데이터</h2>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>월</th><th>순위</th><th>검색어</th><th>날짜</th><th>클릭 수</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </section>
+
+    <script>
+        let chart;
+        const ctx = document.getElementById('clickChart').getContext('2d');
+
+        // 차트 생성 함수
+        function createChart(dailyClicks) {
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dailyClicks.map(item => item.date),
+                    datasets: [{
+                        label: '클릭 수',
+                        data: dailyClicks.map(item => item.click_count),
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'top' } } }
+            });
+        }
+
+        // 테이블 데이터 렌더링 함수
+        function renderTable(data) {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row.month}</td><td>${row.rank_list}</td><td>${row.keyword}</td><td>${row.date}</td><td>${row.click_count}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 날짜 검색 이벤트 처리
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const selectedDate = document.getElementById('search_date').value;
+            document.getElementById('selectedDate').innerText = `📅 선택한 날짜: ${selectedDate}`;
+
+            fetch('/get_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ search_date: selectedDate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    renderTable(data.data);
+                    createChart(data.daily_clicks);
+                }
+            })
+            .catch(error => console.error('🚨 데이터 로딩 실패:', error));
+        });
+    </script>
+</body>
+</html>

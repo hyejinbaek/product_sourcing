@@ -7,11 +7,7 @@ import os
 app = Flask(__name__)
 
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', '3.39.226.9'),
-    'port': int(os.getenv('DB_PORT', 3306)),
-    'user': os.getenv('DB_USER', 'hyejin'),
-    'password': os.getenv('DB_PASSWORD', 'auton1234'),
-    'database': os.getenv('DB_DATABASE', 'raw_data')
+
 }
 
 def connect_db():

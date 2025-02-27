@@ -3,13 +3,13 @@ import pandas as pd
 from openpyxl import load_workbook
 
 # 1. CSV 파일 읽기
-csv_file = '../../../../../Downloads/naver_datalab_shoppingInsight_category_일간_data_20250221135638.csv'  # CSV 파일 경로
+csv_file = '../../../../../Downloads/naver_datalab_shoppingInsight_category_일간_data_20250227164847.csv'  # CSV 파일 경로
 df = pd.read_csv(csv_file, header=7)  # 8번째 행부터 데이터를 읽어옵니다.
 print("CSV Data:")
 print(df.head())
 
 # 2. 기존 Excel 파일 읽기
-excel_file = './crawled_data/2024-01-01~2024-01-31_생활_건강_자동차용품_DIY용품_전체_전체_전체.xlsx'  # 기존 Excel 파일 경로
+excel_file = '../1_data_collection/crawled_data/3월 4주차_2024-03-25~2024-03-31_생활_건강_자동차용품_튜닝용품.xlsx'  # 기존 Excel 파일 경로
 df_excel = pd.read_excel(excel_file)  # sheet_name을 지정하지 않으면 기본적으로 단일 시트를 읽습니다.
 print("Excel Data:")
 print(df_excel.head())

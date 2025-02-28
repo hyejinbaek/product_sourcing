@@ -174,40 +174,24 @@ try:
     driver.execute_script("arguments[0].click();", subcategory_3_btn)
     time.sleep(1)
     
-    subcategory_3 = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@data-cid='50000933']")))
+    subcategory_3 = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@data-cid='50000948']")))
     subcategory_3.click()
     time.sleep(2)
     print("✅ 3차 카테고리 선택 완료!")
-    category_3 = "DIY용품"
+    category_3 = "튜닝용품"
     
     # 4. 기간 선택
     
-    # 4월
-    select_period(start_year="2024", start_month="04", start_day="01", end_year="2024", end_month="04", end_day="07", week_number="1")
-    # select_period(start_year="2024", start_month="04", start_day="08", end_year="2024", end_month="04", end_day="14", week_number="2")
-    # select_period(start_year="2024", start_month="04", start_day="15", end_year="2024", end_month="04", end_day="21", week_number="3")
-    # select_period(start_year="2024", start_month="04", start_day="22", end_year="2024", end_month="04", end_day="28", week_number="4")
-    # select_period(start_year="2024", start_month="04", start_day="29", end_year="2024", end_month="05", end_day="05", week_number="5")
-    #############################################################################################################################################
-    #############################################################################################################################################
-    # 5월
-    # select_period(start_year="2024", start_month="05", start_day="06", end_year="2024", end_month="05", end_day="12", week_number="1")
-    # select_period(start_year="2024", start_month="05", start_day="13", end_year="2024", end_month="05", end_day="19", week_number="2")
-    # select_period(start_year="2024", start_month="05", start_day="20", end_year="2024", end_month="05", end_day="26", week_number="3")
-    # select_period(start_year="2024", start_month="05", start_day="27", end_year="2024", end_month="06", end_day="02", week_number="4")
-    
-    # 6월
-    # select_period(start_year="2024", start_month="06", start_day="03", end_year="2024", end_month="06", end_day="09", week_number="1")
-    # select_period(start_year="2024", start_month="06", start_day="10", end_year="2024", end_month="06", end_day="16", week_number="2")
-    # select_period(start_year="2024", start_month="06", start_day="17", end_year="2024", end_month="06", end_day="23", week_number="3")
-    # select_period(start_year="2024", start_month="06", start_day="24", end_year="2024", end_month="06", end_day="30", week_number="4")
-    
     # 7월
-    # select_period(start_year="2024", start_month="07", start_day="01", end_year="2024", end_month="07", end_day="07", week_number="1")
+    select_period(start_year="2024", start_month="07", start_day="01", end_year="2024", end_month="07", end_day="07", week_number="1")
     # select_period(start_year="2024", start_month="07", start_day="08", end_year="2024", end_month="07", end_day="14", week_number="2")
     # select_period(start_year="2024", start_month="07", start_day="15", end_year="2024", end_month="07", end_day="21", week_number="3")
     # select_period(start_year="2024", start_month="07", start_day="22", end_year="2024", end_month="07", end_day="28", week_number="4")
     # select_period(start_year="2024", start_month="07", start_day="29", end_year="2024", end_month="08", end_day="04", week_number="5")
+    
+    #############################################################################################################################################
+    #############################################################################################################################################
+    
     
     # 8월
     # select_period(start_year="2024", start_month="08", start_day="05", end_year="2024", end_month="08", end_day="11", week_number="1")
@@ -216,7 +200,31 @@ try:
     # select_period(start_year="2024", start_month="08", start_day="26", end_year="2024", end_month="09", end_day="01", week_number="4")
     
     # 9월
+    # select_period(start_year="2024", start_month="09", start_day="02", end_year="2024", end_month="09", end_day="08", week_number="1")
+    # select_period(start_year="2024", start_month="09", start_day="09", end_year="2024", end_month="09", end_day="15", week_number="2")
+    # select_period(start_year="2024", start_month="09", start_day="16", end_year="2024", end_month="09", end_day="22", week_number="3")
+    # select_period(start_year="2024", start_month="09", start_day="23", end_year="2024", end_month="09", end_day="29", week_number="4")
+    # select_period(start_year="2024", start_month="09", start_day="30", end_year="2024", end_month="10", end_day="06", week_number="5")
     
+    # 10월
+    # select_period(start_year="2024", start_month="10", start_day="07", end_year="2024", end_month="10", end_day="13", week_number="1")
+    # select_period(start_year="2024", start_month="10", start_day="14", end_year="2024", end_month="10", end_day="20", week_number="2")
+    # select_period(start_year="2024", start_month="10", start_day="21", end_year="2024", end_month="10", end_day="27", week_number="3")
+    # select_period(start_year="2024", start_month="10", start_day="28", end_year="2024", end_month="11", end_day="03", week_number="4")
+    
+    # 11월
+    # select_period(start_year="2024", start_month="11", start_day="04", end_year="2024", end_month="11", end_day="10", week_number="1")
+    # select_period(start_year="2024", start_month="11", start_day="11", end_year="2024", end_month="11", end_day="17", week_number="2")
+    # select_period(start_year="2024", start_month="11", start_day="18", end_year="2024", end_month="11", end_day="24", week_number="3")
+    # select_period(start_year="2024", start_month="11", start_day="25", end_year="2024", end_month="12", end_day="01", week_number="4")
+    
+    # 12월
+    # select_period(start_year="2024", start_month="12", start_day="02", end_year="2024", end_month="12", end_day="08", week_number="1")
+    # select_period(start_year="2024", start_month="12", start_day="09", end_year="2024", end_month="12", end_day="15", week_number="2")
+    # select_period(start_year="2024", start_month="12", start_day="16", end_year="2024", end_month="12", end_day="22", week_number="3")
+    # select_period(start_year="2024", start_month="12", start_day="23", end_year="2024", end_month="12", end_day="29", week_number="4")
+    # select_period(start_year="2024", start_month="12", start_day="30", end_year="2025", end_month="01", end_day="05", week_number="5")
+        
     print(f"✅ 기간 선택 완료:")
     
     # 8. 조회하기 버튼 클릭

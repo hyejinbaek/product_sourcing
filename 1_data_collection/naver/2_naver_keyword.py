@@ -43,7 +43,7 @@ def switch_api_key():
         api_index = 0  
     print(f"🔄 새로운 API 키 사용: {API_KEYS[api_index]['client_id']}")
 
-def send_request(requested, body, max_retries=5):
+def send_request(requested, body, max_retries=10):
     global api_index
     retries = 0
     while retries < max_retries:
@@ -69,7 +69,7 @@ API_URL = "https://openapi.naver.com/v1/datalab/search"
 requested = request.Request(API_URL)
 requested.add_header("Content-Type", "application/json")
 
-file_path = './dataset/month_3depth/test.xlsx'
+file_path = './dataset/month_3depth/2017-2025_튜닝용품_인기검색어.xlsx'
 file_ext = os.path.splitext(file_path)[1].lower()
 
 if file_ext == ".csv":
@@ -160,7 +160,11 @@ df_result = pd.DataFrame(df_dict)
 # date 배열을 맞춘 후 데이터프레임에 추가
 df_result["date"] = date[:max_length]  # max_length에 맞춰 잘라서 추가
 df_result.set_index("date", inplace=True)
-df_result.to_csv("./dataset/month_3depth_result/keyword.csv", encoding="utf-8-sig")
+# 새로 갱신하여 저장
+# df_result.to_csv("./dataset/month_3depth_result/2017-2025_튜닝용품_인기검색어.csv", encoding="utf-8-sig")
+# 추가 저장
+df_result.to_csv("./dataset/month_3depth_result/2017-2025_튜닝용품_인기검색어_검색량.csv", mode="a", 
+                header=not os.path.exists("./dataset/month_3depth_result/2017-2025_튜닝용품_인기검색어_검색량.csv"), encoding="utf-8-sig")
 print("✅ CSV 파일 저장 완료: keyword.csv")
 
 end_time = time.time()

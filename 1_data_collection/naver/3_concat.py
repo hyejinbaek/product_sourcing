@@ -7,29 +7,19 @@ file_xlsx = "./dataset/month_3depth/2017-2025_튜닝용품_인기검색어.xlsx"
 file_csv = "./dataset/month_3depth_result/2017-2025_튜닝용품_인기검색어_검색량.csv"  # 2번 데이터 파일 (CSV)
 
 # 1번 데이터 로드 (엑셀)
-df_keywords = pd.read_excel(file_xlsx)
+df1 = pd.read_excel(file_xlsx)
 
 # 2번 데이터 로드 (CSV)
-df_search = pd.read_csv(file_csv)
+df2 = pd.read_csv(file_csv)
 
-# 데이터 확인
-print("📌 1번 데이터 샘플")
-print(df_keywords.head())
 
-print("\n📌 2번 데이터 샘플")
-print(df_search.head())
+df1["연-월"] = df1["연도"].astype(str) + "-" + df1["월"].str[-2:]
+df2["연-월"] = pd.to_datetime(df2["date"]).dt.strftime("%Y-%m")
 
-# 2번 데이터 (CSV) 형태 변경: 'long-form'으로 변환
-df_search_melted = df_search.melt(id_vars=["date"], var_name="인기검색어", value_name="검색량")
+# 키워드 기준으로 검색량 매칭
+merged_df = df1.merge(df2.melt(id_vars=["연-월"], var_name="인기검색어", value_name="검색량"),
+                    on=["연-월", "인기검색어"], how="left")
 
-# 병합 (인기검색어 기준)
-df_merged = pd.merge(df_search_melted, df_keywords, on="인기검색어", how="left")
+print(merged_df)
 
-# 날짜 기준 정렬
-df_merged = df_merged.sort_values(by=["date", "인기검색어"])
-
-# 결과 저장
-output_file = "./dataset/final/2017-2025_튜닝용품_final.csv"
-df_merged.to_csv(output_file, index=False, encoding="utf-8-sig")
-
-print(f"✅ 병합 완료! 파일 저장: {output_file}")
+merged_df.to_csv("./dataset/final/2017-2025_튜닝용품_final.csv", index=False, encoding="utf-8-sig")
